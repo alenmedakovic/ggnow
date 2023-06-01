@@ -26,9 +26,9 @@ function Nav() {
       <div class="px-4">
         <div class="flex items-center justify-between">
           <div class="flex shrink-0">
-            <a aria-current="page" class="flex items-center" href="/">
+            <a aria-current="page" class="flex items-center" href="/home">
               <img class="h-10 w-auto" src="https://www.svgrepo.com/show/510441/logo-reason.svg" alt="" />
-              <p class="sr-only">Website Title</p>
+              <p class="sr-only">website title</p>
             </a>
           </div>
           <div class="hidden md:flex md:items-center md:justify-center md:gap-5">
@@ -54,6 +54,16 @@ function Nav() {
                 Sign in
               </a>
             )}
+            <a href="/account">
+                <svg class="profile-photo" width="35" height="35">
+                    <defs>
+                        <pattern id="profile-pattern" width="100%" height="100%">
+                            <image href="https://i.imgur.com/kyFJLvY.jpeg" width="35" height="35" />
+                         </pattern>
+                 </defs>
+                  <circle cx="18" cy="18" r="18" fill="url(#profile-pattern)" />
+              </svg>
+            </a>
           </div>
         </div>
       </div>
