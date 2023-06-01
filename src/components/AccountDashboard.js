@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { getAuth, updateProfile, updateEmail, updatePassword } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { app } from '../firebase'; // Assuming your firebase.js file exports an initialized Firebase app instance
+import { app } from '../firebase';
+import "./accountdashboard.css";
 
 const AccountDashboard = () => {
   const [user, loading, error] = useAuthState(getAuth(app));
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isVerifiedUser, setIsVerifiedUser] = useState(false);
+
+  const userCoverPhoto = "https://cdn.tuk.dev/assets/webapp/forms/form_layouts/form1.jpg";
+  const userProfilePhoto = "https://cdn.tuk.dev/assets/webapp/forms/form_layouts/form2.jpg";
 
   useEffect(() => {
     if (user) {
@@ -16,19 +21,25 @@ const AccountDashboard = () => {
     }
   }, [user]);
 
-  const handleUpdateProfile = async (e) => {
+  const uploadProfilePhoto = async (e) => {
+
+  } 
+
+  const handleUpdateUsername = async (e) => {
     e.preventDefault();
 
     try {
       await updateProfile(user, { displayName });
-      console.log('Profile updated successfully');
+      console.log('Username updated successfully');
     } catch (error) {
-      console.error('Error updating profile', error);
+      console.error('Error updating username', error);
     }
   };
 
   const handleUpdateEmail = async (e) => {
     e.preventDefault();
+
+    if (email) {
 
     try {
       await updateEmail(user, email);
@@ -36,7 +47,10 @@ const AccountDashboard = () => {
     } catch (error) {
       console.error('Error updating email', error);
     }
-  };
+  } else {
+    console.log("No email, do nothing.");
+  }
+};
 
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
@@ -49,6 +63,13 @@ const AccountDashboard = () => {
     }
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleUpdateUsername(e);
+    handleUpdateEmail(e);
+    handleUpdatePassword(e);
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -59,7 +80,7 @@ const AccountDashboard = () => {
 
   return (
     
-    <form id="dashboard">
+    <form id="dashboard" onSubmit={handleSubmit}>
     <div class="bg-white dark:bg-gray-800">
         <div class="container mx-auto bg-white dark:bg-gray-800 rounded">
             <div class="xl:w-full border-b border-gray-300 dark:border-gray-700 py-5 bg-white dark:bg-gray-800">
@@ -72,32 +93,81 @@ const AccountDashboard = () => {
                 </div>
             </div>
             <div class="mx-auto">
-                <div class="xl:w-9/12 w-11/12 mx-auto xl:mx-0">
-                    <div class="rounded relative mt-8 h-48">
-                        <img src="https://cdn.tuk.dev/assets/webapp/forms/form_layouts/form1.jpg" alt="" class="w-full h-full object-cover rounded absolute shadow" />
-                        <div class="absolute bg-black opacity-50 top-0 right-0 bottom-0 left-0 rounded"></div>
-                        <div class="flex items-center px-3 py-2 rounded absolute right-0 mr-4 mt-4 cursor-pointer">
-                            <p class="text-xs text-gray-100">Change Cover Photo</p>
-                            <div class="ml-2 text-gray-100">
-                                <img src="https://tuk-cdn.s3.amazonaws.com/can-uploader/simple_form-svg1.svg" alt="Edit" />
-                            </div>
-                        </div>
+            <div class="xl:w-9/12 w-11/12 mx-auto xl:mx-0">
+  <div class="rounded relative mt-8 h-48">
+    <img src={userCoverPhoto} alt="" class="w-full h-full object-cover rounded absolute shadow" />
+    <div class="absolute bg-black opacity-50 top-0 right-0 bottom-0 left-0 rounded"></div>
+    <div class="flex items-center px-3 py-2 rounded absolute right-0 mr-4 mt-4 cursor-pointer">
+      
+      <div class="ml-2 text-gray-100">
+        <label for="file-upload" class="cursor-pointer">
+          <img class="absolute top-0" src="https://tuk-cdn.s3.amazonaws.com/can-uploader/simple_form-svg1.svg" alt="Edit" />
+          <input id="file-upload" class="hidden" type="file" accept="image/*" />
+        </label>
+      </div>
+    </div>
+  
                         <div class="w-20 h-20 rounded-full bg-cover bg-center bg-no-repeat absolute bottom-0 -mb-10 ml-12 shadow flex items-center justify-center">
-                            <img src="https://cdn.tuk.dev/assets/webapp/forms/form_layouts/form2.jpg" alt="" class="absolute z-0 h-full w-full object-cover rounded-full shadow top-0 left-0 bottom-0 right-0" />
+                            <img src={userProfilePhoto} alt="" class="absolute z-0 h-full w-full object-cover rounded-full shadow top-0 left-0 bottom-0 right-0" />
                             <div class="absolute bg-black opacity-50 top-0 right-0 bottom-0 left-0 rounded-full z-0"></div>
+                            
                             <div class="cursor-pointer flex flex-col justify-center items-center z-10 text-gray-100">
-                                <img src="https://tuk-cdn.s3.amazonaws.com/can-uploader/simple_form-svg1.svg" alt="Edit" />
-                                <p class="text-xs text-gray-100">Edit Picture</p>
+                              <label for="file-upload" class="cursor-pointer">
+                                <img class="" src="https://tuk-cdn.s3.amazonaws.com/can-uploader/simple_form-svg1.svg" alt="Edit" />
+                                <input onChange={handleProfilePictureUpload} id="file-upload" class="hidden" type="file" accept="image/*"></input>
+                              </label>
                             </div>
                         </div>
                     </div>
                     <div class="mt-16 flex flex-col xl:w-2/6 lg:w-1/2 md:w-1/2 w-full">
                         <label for="username" class="pb-2 text-sm font-bold text-gray-800 dark:text-gray-100">Username</label>
-                        <input tabindex="0" type="text" id="username" name="username" required class="border border-gray-300 dark:border-gray-700 pl-3 py-3 shadow-sm rounded text-sm focus:outline-none focus:border-indigo-700 bg-transparent placeholder-gray-500 text-gray-600 dark:text-gray-400" placeholder="@example" />
+                        <input onChange={(e) => setDisplayName(e.target.value)} value={displayName} tabindex="0" type="text" id="username" name="username" class="border border-gray-300 dark:border-gray-700 pl-3 py-3 shadow-sm rounded text-sm focus:outline-none focus:border-indigo-700 bg-transparent placeholder-gray-500 text-gray-600 dark:text-gray-400" placeholder={user.displayName} />
+                    </div>
+                    <div class="xl:w-1/4 lg:w-1/2 md:w-1/2 flex flex-col mt-4">
+                            <label for="Email" class="pb-2 text-sm font-bold text-gray-800 dark:text-gray-100">Email</label>
+                            <div className={`border ${isVerifiedUser ? 'border-green-400' : 'border-gray-300'} shadow-sm rounded flex`}>
+                            <div
+                                  tabIndex={0}
+                                   className={`focus:outline-none px-4 py-3 dark:text-gray-100 flex items-center border-r ${isVerifiedUser ? 'border-green-400' : 'border-gray-300'}`}
+                                    >
+                                    <img class="dark:hidden" src="https://tuk-cdn.s3.amazonaws.com/can-uploader/simple_form-svg2.svg" alt="mail" />
+                                    <img class="dark:block hidden" src="https://tuk-cdn.s3.amazonaws.com/can-uploader/simple_form-svg2dark.svg" alt="mail" />
+                                </div>
+                                <input onChange={(e) => setEmail(e.target.value)} value={email} tabindex="0" type="text" id="Email" name="email" class="pl-3 py-3 w-full text-sm focus:outline-none placeholder-gray-500 rounded bg-transparent text-gray-600 dark:text-gray-400" placeholder={user.email} />
+                            </div>
+                            {isVerifiedUser && (
+                                <div class="flex justify-between items-center pt-1 text-green-700">
+                                 <p class="text-xs">Verified user</p>
+                                 <img src="https://tuk-cdn.s3.amazonaws.com/can-uploader/simple_form-svg3.svg" alt="success" />
+                              </div>
+                            )} 
+                            {email && (
+                              <div class="flex justify-between items-center pt-1 text-red-700">
+                                {!email.includes("@") && <p class="text-xs">Not a valid Email</p>}
+                              </div>
+                            )}
+                            
+                        </div>
+                    <div class="mt-16 flex flex-col xl:w-2/6 lg:w-1/2 md:w-1/2 w-full">
+                      <label for="password" class="pb-2 text-sm font-bold text-fray-800 dark:text-gray-100">Change Password</label>
+                      <input onChange={(e) => setPassword(e.target.value)} value={password} tabindex="0" type="text" id="changepassword" name="changepassword" class="border border-gray-300 dark:border-gray-700 pl-3 py-3 shadow-sm rounded text-sm focus:outline-none focus:border-indigo-700 bg-transparent placeholder-gray-500 text-gray-600 dark:text-gray-400" placeholder="Min. 8 Char." />
+                      {password.length > 0 && (
+                           <div>
+                              {password.length < 8 && !password.includes(' ') && (
+                                <p class="text-xs mt-1 text-red-400">Password should be at least 8 characters long.</p>
+                                      )}
+                             {password.includes(' ') && <p class="text-xs mt-1 text-red-400">Password should not contain spaces.</p>}
+                             {/* Add more validation checks here */}
+                        </div>
+                      )}
+                    </div>
+                    <div class="mt-6 flex flex-col xl:w-2/6 lg:w-1/2 md:w-1/2 w-full">
+                      <label for="password" class="pb-2 text-sm font-bold text-fray-800 dark:text-gray-100">Confirm New Password</label>
+                      <input tabindex="0" type="text" id="confirmpassword" name="confirmpassword" class="border border-gray-300 dark:border-gray-700 pl-3 py-3 shadow-sm rounded text-sm focus:outline-none focus:border-indigo-700 bg-transparent placeholder-gray-500 text-gray-600 dark:text-gray-400" placeholder="Min 8 Char." />
                     </div>
                     <div class="mt-8 flex flex-col xl:w-3/5 lg:w-1/2 md:w-1/2 w-full">
-                        <label for="about" class="pb-2 text-sm font-bold text-gray-800 dark:text-gray-100">About</label>
-                        <textarea id="about" name="about" required class="bg-transparent border border-gray-300 dark:border-gray-700 pl-3 py-3 shadow-sm rounded text-sm focus:outline-none focus:border-indigo-700 resize-none placeholder-gray-500 text-gray-600 dark:text-gray-400" placeholder="Let the world know who you are" rows="5"></textarea>
+                        <label for="about" class="pb-2 text-sm font-bold text-gray-800 dark:text-gray-100">About You</label>
+                        <textarea id="about" name="about" class="bg-transparent border border-gray-300 dark:border-gray-700 pl-3 py-3 shadow-sm rounded text-sm focus:outline-none focus:border-indigo-700 resize-none placeholder-gray-500 text-gray-600 dark:text-gray-400" placeholder="Let the world know who you are" rows="5"></textarea>
                         <p class="w-full text-right text-xs pt-1 text-gray-600 dark:text-gray-400">Character Limit: 200</p>
                     </div>
                 </div>
@@ -124,20 +194,7 @@ const AccountDashboard = () => {
                             <label for="LastName" class="pb-2 text-sm font-bold text-gray-800 dark:text-gray-100">Last Name</label>
                             <input tabindex="0" type="text" id="LastName" name="lastName" required class="border border-gray-300 dark:border-gray-700 pl-3 py-3 shadow-sm bg-transparent rounded text-sm focus:outline-none focus:border-indigo-700 placeholder-gray-500 text-gray-600 dark:text-gray-400" placeholder="" />
                         </div>
-                        <div class="xl:w-1/4 lg:w-1/2 md:w-1/2 flex flex-col mb-6">
-                            <label for="Email" class="pb-2 text-sm font-bold text-gray-800 dark:text-gray-100">Email</label>
-                            <div class="border border-green-400 shadow-sm rounded flex">
-                                <div tabindex="0" class="focus:outline-none px-4 py-3 dark:text-gray-100 flex items-center border-r border-green-400">
-                                    <img class="dark:hidden" src="https://tuk-cdn.s3.amazonaws.com/can-uploader/simple_form-svg2.svg" alt="mail" />
-                                    <img class="dark:block hidden" src="https://tuk-cdn.s3.amazonaws.com/can-uploader/simple_form-svg2dark.svg" alt="mail" />
-                                </div>
-                                <input tabindex="0" type="text" id="Email" name="email" required class="pl-3 py-3 w-full text-sm focus:outline-none placeholder-gray-500 rounded bg-transparent text-gray-600 dark:text-gray-400" placeholder="example@gmail.com" />
-                            </div>
-                            <div class="flex justify-between items-center pt-1 text-green-700">
-                                <p class="text-xs">Email submission success!</p>
-                               <img src="https://tuk-cdn.s3.amazonaws.com/can-uploader/simple_form-svg3.svg" alt="success" />
-                            </div>
-                        </div>
+                        
                         <div class="xl:w-1/4 lg:w-1/2 md:w-1/2 flex flex-col mb-6">
                             <label for="StreetAddress" class="pb-2 text-sm font-bold text-gray-800 dark:text-gray-100">Street Address</label>
                             <input tabindex="0" type="text" id="StreetAddress" name="streetAddress" required class="border border-gray-300 dark:border-gray-700 pl-3 py-3 shadow-sm rounded bg-transparent text-sm focus:outline-none focus:border-indigo-700 placeholder-gray-500 text-gray-600 dark:text-gray-400" placeholder="" />

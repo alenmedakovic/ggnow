@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { getDocs, query, collection, doc, getDoc } from "firebase/firestore";
+import { getDocs, query, collection, doc, getDoc, } from "firebase/firestore";
 import { storage, firestore } from "../firebase";
+import { getAuth } from "firebase/auth";
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { app } from "../firebase";
 
 
 const FetchThreads = () => {
   const [threadList, setThreadList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [user] = useAuthState(getAuth(app));
 
   
 
@@ -46,7 +50,7 @@ const FetchThreads = () => {
         <div key={thread.id} className="border-gray-300 border-2 p-6 h-80 shadow relative">
           <h3 className="text-xl font-bold mb-2 w-1/3">{thread.title}</h3>
           <p className="p-2 w-1/2 overflow-auto h-40">{thread.description}</p>
-          <p className="text-gray-500 text-sm mb-4 w-1/2">by: {thread.uid}</p>
+          <p className="text-gray-500 text-sm mb-4 w-1/2">by: {user.displayName}</p>
           <p className="text-gray-400 text-sm italic font-extralight">{thread.createdAt.toLocaleDateString()}</p>
           <div className="relative">
             <div className="w-96 h-60 bottom-0 right-10 absolute">
