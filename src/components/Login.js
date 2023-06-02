@@ -19,7 +19,6 @@ function Login() {
           // User is signed in, see docs for a list of available properties
           // https://firebase.google.com/docs/reference/js/auth.user
           const uid = user.uid;
-          console.log("your user id:", uid);
           navigate("/home");
           // ...
         } else {
@@ -71,7 +70,7 @@ function Login() {
 
                 <div class="text-grey-dark mt-6">
                     Don't have an account? 
-                    <a class="no-underline border-b border-blue text-blue" href="../login/">
+                    <a class="no-underline border-b border-blue text-blue" href="/register">
                         Sign up
                     </a>.
                 </div>

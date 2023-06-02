@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
 import Nav from "./Nav";
-import "./home.css";
 import CreateThread from '../utils/CreateThread';
 import FetchThreads from "../handlers/FetchThreads";
 import AdContainer from "../components/AdContainer";

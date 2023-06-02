@@ -1,29 +1,124 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getAuth, updateProfile, updateEmail, updatePassword } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { app } from '../firebase';
-import "./accountdashboard.css";
+import { app, storage, auth, firestore } from '../firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { addDoc, serverTimestamp, collection } from 'firebase/firestore';
+import { uploadBytes, getDownloadURL, ref, getStorage, deleteObject } from 'firebase/storage';
+import { useNavigate } from 'react-router';
+import Nav from "./Nav";
 
 const AccountDashboard = () => {
   const [user, loading, error] = useAuthState(getAuth(app));
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
   const [isVerifiedUser, setIsVerifiedUser] = useState(false);
+
+  const [isMediaUploading, setIsMediaUploading] = useState(false);
+  const [isProfilePhotoSelected, setIsProfilePhotoSelected] = useState(false);
+  const [isCoverPhotoSelected, setIsCoverPhotoSelected] = useState(false);
+  const [selectedCoverPhoto, setSelectedCoverPhoto] = useState(null);
+  const [selectedProfilePhoto, setSelectedProfilePhoto] = useState(null);
+  const [profilePhotoURL, setProfilePhotoURL] = useState("");
+  const [coverPhotoURL, setCoverPhotoURL] = useState("");
+  const coverPhotoInputRef = useRef(null);
+  const profilePhotoInputRef = useRef(null);
 
   const userCoverPhoto = "https://cdn.tuk.dev/assets/webapp/forms/form_layouts/form1.jpg";
   const userProfilePhoto = "https://cdn.tuk.dev/assets/webapp/forms/form_layouts/form2.jpg";
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
       setDisplayName(user.displayName || '');
       setEmail(user.email || '');
+      fetchMedia();
     }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in, see docs for a list of available properties
+        // https://firebase.google.com/docs/reference/js/auth.user
+        const uid = user.uid;
+        // ...
+      } else {
+         navigate("/login");
+         console.log("user is no longer signed in.")
+        // User is signed out
+        // ...
+      }
+    });
   }, [user]);
 
-  const uploadProfilePhoto = async (e) => {
+  const handleMediaUpload = async () => {
+    const storage = getStorage();
+  
+    // Assuming you have the user's UID available
+    const userUID = user.uid; // Replace with the actual user UID
+  
+    // Define the storage paths for profile and cover photos
+    const profilePhotoPath = `users/${userUID}/media/profile/profile-photo.jpg`;
+    const coverPhotoPath = `users/${userUID}/media/cover/cover-photo.jpg`;
+  
+    try {
+      setIsMediaUploading(true);
+  
+      // Upload the new profile photo
+      if (isProfilePhotoSelected && selectedProfilePhoto) {
+        const uploadedProfilePhotoRef = ref(storage, profilePhotoPath);
+        await uploadBytes(uploadedProfilePhotoRef, selectedProfilePhoto);
+      }
+  
+      // Upload the new cover photo
+      if (isCoverPhotoSelected && selectedCoverPhoto) {
+        const uploadedCoverPhotoRef = ref(storage, coverPhotoPath);
+        await uploadBytes(uploadedCoverPhotoRef, selectedCoverPhoto);
+      }
+  
+      console.log("Media uploaded successfully!");
+  
+      setIsMediaUploading(false);
+      setIsProfilePhotoSelected(false);
+      setIsCoverPhotoSelected(false);
+      setSelectedCoverPhoto(null);
+      setSelectedProfilePhoto(null);
+    } catch (error) {
+      console.error("Error uploading media:", error);
+      setIsMediaUploading(false);
+    }
+  };
 
-  } 
+  const fetchMedia = async () => {
+    const storage = getStorage();
+  
+    // Assuming you have the user's UID available
+    const userUID = user.uid; // Replace with the actual user UID
+  
+    // Define the storage path for the profile photo
+    const profilePhotoPath = `users/${userUID}/media/profile/profile-photo.jpg`;
+    const coverPhotoPath = `users/${userUID}/media/cover/cover-photo.jpg`
+  
+    try {
+      const profilePhotoRef = ref(storage, profilePhotoPath);
+      const coverPhotoRef = ref(storage, coverPhotoPath)
+
+      const profilePhotoDownloadURL = await getDownloadURL(profilePhotoRef);
+      const coverPhotoDownloadURL = await getDownloadURL(coverPhotoRef);
+  
+      // Save the download URL in a variable or state
+      setProfilePhotoURL(profilePhotoDownloadURL);
+      setCoverPhotoURL(coverPhotoDownloadURL);
+      // You can set the profilePhotoURL state or use it as needed
+  
+      // ...
+    } catch (error) {
+      console.error("Error fetching photos:", error);
+    }
+  };
+  
+
 
   const handleUpdateUsername = async (e) => {
     e.preventDefault();
@@ -63,12 +158,39 @@ const AccountDashboard = () => {
     }
   };
 
+  const handleCoverInputChange = async (uploadedCoverPhoto) => {
+    const file = uploadedCoverPhoto.target.files[0];
+    setSelectedCoverPhoto(file);
+    setIsCoverPhotoSelected(!!file);
+    console.log("uploaded cover photo", file);
+    coverPhotoInputRef.current.value = null;
+  };
+
+  const handleProfilePicInputChange = async (uploadedProfilePhoto) => {
+    const file = uploadedProfilePhoto.target.files[0];
+    setSelectedProfilePhoto(file);
+    setIsProfilePhotoSelected(!!file);
+    console.log("uploaded proifle photo", file);
+    profilePhotoInputRef.current.value = null;
+  }
+
+  const handleCoverPhotoLabelClick = () => {
+    coverPhotoInputRef.current.click();
+  };
+
+  const handleProfilePhotoLabelClick = () => {
+    profilePhotoInputRef.current.click();
+  }
+ 
+
   const handleSubmit = (e) => {
     e.preventDefault();
     handleUpdateUsername(e);
     handleUpdateEmail(e);
     handleUpdatePassword(e);
+    handleMediaUpload(selectedCoverPhoto, selectedProfilePhoto);
   };
+
 
   if (loading) {
     return <div>Loading...</div>;
@@ -79,7 +201,8 @@ const AccountDashboard = () => {
   }
 
   return (
-    
+    <>
+    <Nav profilePhotoURL={profilePhotoURL} />
     <form id="dashboard" onSubmit={handleSubmit}>
     <div class="bg-white dark:bg-gray-800">
         <div class="container mx-auto bg-white dark:bg-gray-800 rounded">
@@ -95,29 +218,49 @@ const AccountDashboard = () => {
             <div class="mx-auto">
             <div class="xl:w-9/12 w-11/12 mx-auto xl:mx-0">
   <div class="rounded relative mt-8 h-48">
-    <img src={userCoverPhoto} alt="" class="w-full h-full object-cover rounded absolute shadow" />
+    <img src={isCoverPhotoSelected ? URL.createObjectURL(selectedCoverPhoto) : coverPhotoURL} alt="" class="w-full h-full object-cover rounded absolute shadow" />
     <div class="absolute bg-black opacity-50 top-0 right-0 bottom-0 left-0 rounded"></div>
     <div class="flex items-center px-3 py-2 rounded absolute right-0 mr-4 mt-4 cursor-pointer">
       
       <div class="ml-2 text-gray-100">
-        <label for="file-upload" class="cursor-pointer">
+        <label for="file-upload" class="cursor-pointer" onClick={handleCoverPhotoLabelClick}>
           <img class="absolute top-0" src="https://tuk-cdn.s3.amazonaws.com/can-uploader/simple_form-svg1.svg" alt="Edit" />
-          <input id="file-upload" class="hidden" type="file" accept="image/*" />
+          <input
+        id="cover-photo-upload"
+        type="file"
+        ref={coverPhotoInputRef}
+        accept="image/*"
+        style={{ display: "none" }}
+        onChange={(uploadedCoverPhoto) => handleCoverInputChange(uploadedCoverPhoto)}
+      />
         </label>
       </div>
     </div>
   
                         <div class="w-20 h-20 rounded-full bg-cover bg-center bg-no-repeat absolute bottom-0 -mb-10 ml-12 shadow flex items-center justify-center">
-                            <img src={userProfilePhoto} alt="" class="absolute z-0 h-full w-full object-cover rounded-full shadow top-0 left-0 bottom-0 right-0" />
+                            <img src={isProfilePhotoSelected ? URL.createObjectURL(selectedProfilePhoto) : profilePhotoURL} alt="" class="absolute z-0 h-full w-full object-cover rounded-full shadow top-0 left-0 bottom-0 right-0" />
                             <div class="absolute bg-black opacity-50 top-0 right-0 bottom-0 left-0 rounded-full z-0"></div>
                             
                             <div class="cursor-pointer flex flex-col justify-center items-center z-10 text-gray-100">
-                              <label for="file-upload" class="cursor-pointer">
-                                <img class="" src="https://tuk-cdn.s3.amazonaws.com/can-uploader/simple_form-svg1.svg" alt="Edit" />
-                                <input onChange={handleProfilePictureUpload} id="file-upload" class="hidden" type="file" accept="image/*"></input>
-                              </label>
+                            <label htmlFor="file-upload" className="cursor-pointer" onClick={handleProfilePhotoLabelClick}>
+        <img
+          className=""
+          src="https://tuk-cdn.s3.amazonaws.com/can-uploader/simple_form-svg1.svg"
+          alt="Edit"
+        />
+      </label>
+      <input
+        id="profile-photo-upload"
+        type="file"
+        ref={profilePhotoInputRef}
+        accept="image/*"
+        style={{ display: "none" }}
+        onChange={(uploadedProfilePhoto) => handleProfilePicInputChange(uploadedProfilePhoto)}
+      />
+                              
                             </div>
                         </div>
+                        
                     </div>
                     <div class="mt-16 flex flex-col xl:w-2/6 lg:w-1/2 md:w-1/2 w-full">
                         <label for="username" class="pb-2 text-sm font-bold text-gray-800 dark:text-gray-100">Username</label>
@@ -290,9 +433,9 @@ const AccountDashboard = () => {
                 <button role="button" aria-label="Save form" class="focus:ring-2 focus:ring-offset-2 focus:ring-indigo-700 bg-indigo-700 focus:outline-none transition duration-150 ease-in-out hover:bg-indigo-600 rounded text-white px-8 py-2 text-sm" type="submit">Save</button>
             </div>
         </div>
-    </div>
-</form>
-
+      </div>
+    </form>
+    </>
   );
 };
 
