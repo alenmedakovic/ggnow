@@ -40,8 +40,6 @@ function Nav() {
 
     await waitForUserUID();
 
-    console.log("userID now availible");
-
     const userUID = user.uid;
     // Define the storage path for the profile photo
     const profilePhotoPath = `users/${userUID}/media/profile/profile-photo.jpg`;

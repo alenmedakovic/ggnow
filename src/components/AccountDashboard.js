@@ -106,6 +106,9 @@ const AccountDashboard = () => {
 
       const profilePhotoDownloadURL = await getDownloadURL(profilePhotoRef);
       const coverPhotoDownloadURL = await getDownloadURL(coverPhotoRef);
+
+      await updateProfile(user, { photoURL: profilePhotoDownloadURL });
+      console.log("Profile photo updated successfully");
   
       // Save the download URL in a variable or state
       setProfilePhotoURL(profilePhotoDownloadURL);

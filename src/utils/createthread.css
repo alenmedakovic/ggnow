@@ -1,3 +1,24 @@
 .create__button {
     margin-left: 62px;
 }
+
+#create__thread__container {
+    background-color: #FAFAFA;
+    border-radius: 20px;
+    border: 1px solid #D1D5DB;
+    box-shadow: 1px 3px 4px #D1D5DB;
+    border-top: none;
+}
+
+#media__preview__container {
+    border: 1px solid #D1D5DB;
+    box-shadow: 1px 1px 10px #D1D5DB;
+}
+
+#clear__media__button {
+    position: absolute;
+    top: 9%;
+    font-size: 24px;
+    background-color: rgba(0, 0, 0, 0.5);
+    left: 0;
+}

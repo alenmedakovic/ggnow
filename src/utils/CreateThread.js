@@ -21,7 +21,6 @@ const CreateThread = () => {
           // User is signed in, see docs for a list of available properties
           // https://firebase.google.com/docs/reference/js/auth.user
           const uid = user.uid;
-          console.log("your user id:", uid);
           // ...
         } else {
           navigate("/login");
@@ -97,7 +96,7 @@ const CreateThread = () => {
 
   return (
     <div className="flex flex-col w-full h-full">
-      <div className="flex flex-col flex-grow justify-between">
+      <div id="create__thread__container" className="flex flex-col flex-grow justify-between">
         <div className="flex flex-col p-4">
           <input
             className="w-1/3 mb-4 px-2 py-2 bg-transparent border-b-2 border-gray-300 focus:outline-none"
@@ -130,7 +129,7 @@ const CreateThread = () => {
       </div>
       <div className="flex absolute w-60 ml-80 py-4">
         {mediaPreview && (
-          <div className="max-w-1/3 max-h-40 border-gray-300 border-2">
+          <div id="media__preview__container" className="max-w-1/3 max-h-40">
             {media.type.startsWith('image') ? (
               <img className="h-full w-full object-cover" src={mediaPreview} alt="Media Preview" />
             ) : (
@@ -140,7 +139,8 @@ const CreateThread = () => {
               </video>
             )}
             <button
-            className="absolute top-0 left-60 text-gray-500"
+            id="clear__media__button"
+            className=" text-red-500"
             onClick={clearMedia}
             >
               <FaTimes />

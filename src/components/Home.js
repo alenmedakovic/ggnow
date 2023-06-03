@@ -29,7 +29,7 @@ function Home(user) {
   return (
     <div className="mt-32 relative bg-white flex align-middle justify-center w-full">
     <Nav />
-    <div className="w-full max-w-xl h-66 shadow-md flex bg-gray-50 border-2 border-gray-300 rounded">
+    <div className="w-full max-w-xl h-66 flex">
       <CreateThread />
     </div>
     <div className="w-3/4 left-12 absolute h-infinite top-80">
