@@ -3,4 +3,31 @@
     height: 20px;
     border-radius: 50%;
     object-fit: contain;
+    margin: 5px;
 }
+
+#li__replies {
+    margin: 10px;
+    margin-top: 0px;
+    border: 2px solid #FAFAFA;
+    box-shadow: 1px 1px 5px #FAFAFA;
+    border-radius: 10px;
+    min-height: 65px;
+    max-height: 65px;
+    min-width: 98%;
+    max-width: 98%;
+    overflow: auto;
+    resize: none;
+    text-align: top;
+    display: flex;
+    word-wrap: break-word;
+}
+
+#ul__replies p {
+    margin: 2px;
+    margin-top: 5px;
+    margin-left: 30px;
+    max-width: 80%;
+    overflow: hidden;
+}
+

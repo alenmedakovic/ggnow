@@ -5,7 +5,7 @@ import { firestore } from "../firebase";
 import { getAuth } from "firebase/auth";
 import "./fetchreplies.css";
 
-const FetchReplies = ({ thread, limit }) => {
+const FetchReplies = ({ thread, limit, refresh }) => {
   const [replyList, setReplyList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -51,16 +51,16 @@ const FetchReplies = ({ thread, limit }) => {
     };
 
     fetchReplies();
-  }, [thread.id]);
+  }, [thread.id, refresh]);
 
   return (
     <div>
       {isLoading ? (
         <p>Loading replies...</p>
       ) : (
-        <ul>
+        <ul id="ul__replies" key={refresh}>
           {replyList.map((reply, index) => (
-            <li key={reply.id}>
+            <li id="li__replies" key={reply.id}>
               {reply.photoURL && <button> <img id="user__photo" src={reply.photoURL} alt="Profile Photo" /> </button>}
               <p>{reply.content}</p>
             </li>

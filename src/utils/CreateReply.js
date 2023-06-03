@@ -28,7 +28,7 @@ const CreateReply = ({ thread }) => {
   };
 
   return (
-    <div class="w-full mt-12 flex items-center">
+    <div class="w-full mt-2 flex items-center">
       <textarea
         class="w-1/2 h-11 rounded-2xl p-2 border-gray-300 border-2 resize-none"
         value={content}
