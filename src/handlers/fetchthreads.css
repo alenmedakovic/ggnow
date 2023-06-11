@@ -27,24 +27,43 @@
     border-radius: 10px;
 }
 
+#likes__icon {
+    overflow: visible;
+    position: absolute;
+    right: 31.25%;
+    top: 5%;
+}
+
+#replies__icon {
+    position: absolute;
+    left: 76%;
+    top: 5%;
+}
+
+#views__icon {
+    position: absolute;
+    right: 74%;
+
+}
+
 #likes__icon__label {
-    right: 32.25%;
+    right: 35%;
     font-size: 12px;
     font-weight: 700;
 }
 
 #views__icon__label {
-    right: 72.5%;
+    right: 72%;
     font-size: 12px;
     font-weight: 700;
 }
 
 #comments__icon__label {
-    left: 77%;
+    left: 73%;
     font-size: 12px;
     font-weight: 700;
 }
 
 #reactions__container {
-    left: 62.25%;
+    left: 63.5%;
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   getDocs,
   query,
@@ -7,22 +7,28 @@ import {
   getDoc,
   updateDoc,
   setDoc,
-  where
+  where,
+  collectionGroup
 } from "firebase/firestore";
 import { storage, firestore } from "../firebase";
+
 import { getAuth } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { app } from "../firebase";
 import CreateReply from "../utils/CreateReply.js";
 import FetchReplies from "./FetchReplies";
-import LikeAnimation from "../animations/LikeAnimation";
+import FetchReplyCount from "./FetchReplyCount";
+import { ThemeContext } from "../utils/ThemeContext";
 import "./fetchthreads.css";
 
-const FetchThreads = () => {
+const FetchThreads = () => { 
   const [threadList, setThreadList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [user] = useAuthState(getAuth(app));
   const [likedThreads, setLikedThreads] = useState([]);
+  const [repliesCount, setRepliesCount] = useState();
+
+  const { isDarkMode } = useContext(ThemeContext);
 
 
   const fetchThreads = async () => {
@@ -43,6 +49,8 @@ const FetchThreads = () => {
 
       setIsLoading(false);
       setThreadList(threads);
+
+
     } catch (error) {
       console.error("Error fetching threads:", error);
     }
@@ -71,6 +79,7 @@ const FetchThreads = () => {
         });
   
         setLikedThreads(likedThreads);
+        console.log(likedThreads); 
       } catch (error) {
         console.error("Error fetching liked threads:", error);
       }
@@ -117,21 +126,23 @@ const FetchThreads = () => {
       }
     }
   };
-  
-  
+ 
 
   useEffect(() => {
     fetchThreads();
     fetchLikedThreads();
-  }, []);
+}, []);
 
-  return (
-    <div className="p-4">
-      {isLoading ? (
-        <p>Loading threads...</p>
-      ) : (
-        <div className="space-y-4 border-none">
-          {threadList.map((thread) => (
+return (
+  <div className="p-4">
+    {isLoading ? (
+      <p>Loading threads...</p>
+    ) : (
+      <div className="space-y-4 border-none">
+        {threadList.map((thread) => {
+          const isLiked = thread.likes && thread.likes.includes(user.uid);
+
+          return (
             <div
               id="thread__item"
               key={thread.id}
@@ -173,57 +184,73 @@ const FetchThreads = () => {
                   )}
                 </div>
               </div>
-              <div class="w-full h-10 mt-6 flex relative">
+              <div className="w-full h-10 mt-6 flex relative">
                 <CreateReply thread={thread} />
               </div>
               <div
                 id="comments__container"
-                class="flex-row p-2 mt-6 h-40 w-1/2"
+                className="flex-row p-2 mt-6 h-40 w-1/2"
               >
                 <FetchReplies thread={thread} limit={2} />
               </div>
               <div
                 id="reactions__container"
-                class="bottom-20 w-64 h-16 justify-center text-center flex absolute"
+                className="bottom-20 w-64 h-16 justify-center text-center flex absolute"
               >
                 <label
                   id="views__icon__label"
-                  class="italic absolute top-16 w-20 h-8 justify-center text-center"
+                  className="italic absolute top-16 w-20 h-8 justify-center text-center"
                 >
-                  23240
+                  1
                 </label>
                 <img
-                  class="w-16 h-auto p-2"
+                  id="views__icon"
+                  className="w-16 h-auto"
                   src="https://www.svgrepo.com/show/103061/eye.svg"
                 />
-                <label id="likes__icon__label" className="italic absolute top-16 w-20 h-8 justify-center text-center">
+                <label
+                  id="likes__icon__label"
+                  className="italic absolute top-16 w-20 h-8 justify-center text-center"
+                >
                   {Object.keys(thread.likes || {}).length}
                 </label>
                 <button onClick={() => handleLike(thread.id)}>
-                  <img
-                    class="w-16 h-auto p-2 mx-10"
-                    src="https://i.pinimg.com/564x/06/61/19/0661199855c9b3ac85019f135445668f.jpg"
-                  />
+                  <div class="mt-4">
+                <svg id="likes__icon" xmlns="http://www.w3.org/2000/svg" width="72" height="72"
+                 stroke-width="2" stroke="black" fill={isLiked ? "red" : "none"}
+                  class="bi bi-heart-fill" viewBox="0 0 25 25"
+                  style={{
+                    transform: `scale(${isLiked ? 1.2 : 1}) translateX(${isLiked ? '2px' : '0'})`,
+                    transition: 'transform 0.3s',
+                    // Add more custom styles for when the SVG is liked
+                    // For example, change colors, add shadows, etc.
+                  }}>
+                     <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
+                </svg>
+                 </div>
                 </button>
                 <label
                   id="comments__icon__label"
-                  class="italic w-20 h-8 overflow-hidden justify-center text-center absolute top-16"
+                  className="italic w-16 h-auto overflow-hidden justify-center text-center absolute top-16"
                 >
-                  33
+                  <FetchReplyCount thread={thread} />
                 </label>
                 <button>
                   <img
-                    class="w-14 h-auto p-2 ml-6"
+                    id="replies__icon"
+                    className="w-14 h-auto"
                     src="https://www.svgrepo.com/show/498779/comment-text.svg"
                   />
                 </button>
               </div>
             </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+          );
+        })}
+      </div>
+    )}
+  </div>
+);
+
 };
 
 export default FetchThreads;

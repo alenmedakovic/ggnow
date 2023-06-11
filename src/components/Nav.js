@@ -1,15 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { auth } from "../firebase";
 import { onAuthStateChanged, getAuth } from "firebase/auth";
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { signOutUser } from "../handlers/handleAuth";
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 import { app} from "../firebase";
+import { ThemeContext } from "../utils/ThemeContext";
 
 function Nav() {
   const [user] = useAuthState(getAuth(app));
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [profilePhotoURL, setProfilePhotoURL] = useState("");
+  
+  const { isDarkMode, toggleDarkMode } = useContext(ThemeContext);
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -70,10 +73,6 @@ function Nav() {
             </a>
           </div>
           <div class="absolute left-16">
-          <input class="border-2 border-gray-300 rounded-xl w-1/2 h-8" type="text" />
-          <button type="button">
-            <img class="h-6 w-auto mb-1 px-2 inline-block" src="https://cdn.iconscout.com/icon/free/png-512/free-search-1768073-1502246.png?f=avif&w=512" />
-          </button>
           </div>
           <div class="hidden md:flex md:items-center md:justify-center md:gap-5">
             <a aria-current="page"

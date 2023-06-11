@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { collection, query, getDocs, doc, getDoc } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
-import { firestore } from "../firebase";
+import { firestore, storage } from "../firebase";
 import { getAuth } from "firebase/auth";
+import { onSnapshot } from "firebase/firestore";
 import "./fetchreplies.css";
 
-const FetchReplies = ({ thread, limit, refresh }) => {
+const FetchReplies = ({ thread, limit, onTotalReplies }) => {
   const [replyList, setReplyList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [amountReplies, setAmountReplies] = useState(0);
 
   useEffect(() => {
     const threadId = thread.id;
@@ -40,6 +42,10 @@ const FetchReplies = ({ thread, limit, refresh }) => {
           repliesData.push(reply);
         }
 
+        const repliesLength = repliesData.length;
+        setAmountReplies(repliesLength);
+
+
         const limitedReplies =
           limit && limit > 0 ? repliesData.slice(0, limit) : repliesData;
 
@@ -51,20 +57,27 @@ const FetchReplies = ({ thread, limit, refresh }) => {
     };
 
     fetchReplies();
-  }, [thread.id, refresh]);
+  }, [thread.id]);
+
+  const handleClickOnReply = () => {
+    const selectedReply = thread.id;
+    console.log(selectedReply);
+  }
 
   return (
     <div>
       {isLoading ? (
         <p>Loading replies...</p>
       ) : (
-        <ul id="ul__replies" key={refresh}>
+        <ul id="ul__replies">
           {replyList.map((reply, index) => (
             <li id="li__replies" key={reply.id}>
+              <a className="cursor-pointer align-middle" onClick={() => handleClickOnReply(thread)}>
               {reply.photoURL && <button> <img id="user__photo" src={reply.photoURL} alt="Profile Photo" /> </button>}
               <p>{reply.content}</p>
+              </a>
             </li>
-          ))}
+          ))}  
         </ul>
       )}
     </div>

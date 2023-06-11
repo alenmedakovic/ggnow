@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
@@ -6,9 +6,12 @@ import Nav from "./Nav";
 import CreateThread from '../utils/CreateThread';
 import FetchThreads from "../handlers/FetchThreads";
 import AdContainer from "../components/AdContainer";
+import { ThemeContext } from "../utils/ThemeContext";
 
 function Home(user) {
     const navigate = useNavigate();
+
+    const { isDarkMode } = useContext(ThemeContext);
 
     useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -27,12 +30,12 @@ function Home(user) {
     })
 
   return (
-    <div className="mt-32 relative bg-white flex align-middle justify-center w-full">
+    <div className="mt-32 relative flex align-middle justify-center w-full">
     <Nav />
     <div className="w-full max-w-xl h-66 flex">
       <CreateThread />
     </div>
-    <div className="w-3/4 left-12 absolute h-infinite top-80">
+    <div  className="w-3/4 left-12 absolute h-infinite top-80">
         <FetchThreads />
     </div>
     <div className="ad__container fixed top-10">
